@@ -43,21 +43,23 @@ Preferred communication style: Simple, everyday language.
 - **Notifications**: Toast system for user feedback
 
 ### Backend Components
-- **API Routes**: RESTful API structure (currently empty, ready for implementation)
-- **Storage Interface**: Abstracted storage layer with in-memory implementation
-- **User Management**: Basic user schema and CRUD operations defined
+- **API Routes**: RESTful API with user management, game results, and statistics endpoints
+- **Storage Interface**: Database storage layer with PostgreSQL integration
+- **User Management**: Complete user CRUD operations with password handling
+- **Game Statistics**: Real-time game result tracking and user statistics
 - **Request Logging**: Middleware for API request logging and monitoring
 
 ### Shared Components
-- **Database Schema**: User table definition with Drizzle ORM
-- **Type Definitions**: Shared TypeScript types for data consistency
-- **Validation Schemas**: Zod schemas for data validation
+- **Database Schema**: Complete game database with users, game results, and user statistics tables
+- **Type Definitions**: Shared TypeScript types for data consistency across frontend and backend
+- **Validation Schemas**: Zod schemas for runtime data validation
+- **Relations**: Drizzle ORM relations for efficient database queries
 
 ## Data Flow
 
 1. **Frontend Requests**: React components use TanStack Query for API calls
 2. **API Layer**: Express.js handles HTTP requests with JSON middleware
-3. **Storage Layer**: Abstracted storage interface allows switching between in-memory and database storage
+3. **Storage Layer**: PostgreSQL database with Drizzle ORM for persistent data storage
 4. **Data Validation**: Zod schemas validate data at API boundaries
 5. **Response Handling**: Standardized error handling and response formatting
 
@@ -103,4 +105,4 @@ Preferred communication style: Simple, everyday language.
 - **Asset Handling**: Vite handles frontend assets, Express serves them in production
 - **Error Handling**: Global error middleware with proper status codes and JSON responses
 
-The architecture is designed for scalability with clear separation of concerns, type safety throughout the stack, and a flexible storage layer that can evolve from in-memory to full database implementation.
+The architecture is designed for scalability with clear separation of concerns, type safety throughout the stack, and a PostgreSQL database backend for persistent game data and user statistics tracking.
