@@ -23,6 +23,8 @@ export default function Game() {
   const [roundResult, setRoundResult] = useState<string>("Ready to play!");
   const [isThinking, setIsThinking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [battleAnimation, setBattleAnimation] = useState(false);
+  const [gamePhase, setGamePhase] = useState<'ready' | 'selecting' | 'battle' | 'result'>('ready');
   const [stats, setStats] = useState<GameStats>({
     totalGames: 0,
     wins: 0,
@@ -47,54 +49,63 @@ export default function Game() {
   const playSound = (type: 'click' | 'win' | 'lose' | 'draw' | 'hover') => {
     if (isMuted || !(window as any).gameAudioContext) return;
     
-    const audioContext = (window as any).gameAudioContext;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    switch (type) {
-      case 'click':
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-        oscillator.stop(audioContext.currentTime + 0.1);
-        break;
-      case 'win':
-        // Ascending victory sound
-        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
-        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        oscillator.stop(audioContext.currentTime + 0.3);
-        break;
-      case 'lose':
-        // Descending defeat sound
-        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.4);
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-        oscillator.stop(audioContext.currentTime + 0.4);
-        break;
-      case 'draw':
-        // Neutral draw sound
-        oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-        oscillator.stop(audioContext.currentTime + 0.2);
-        break;
-      case 'hover':
-        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-        oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
-        oscillator.stop(audioContext.currentTime + 0.05);
-        break;
+    try {
+      const audioContext = (window as any).gameAudioContext;
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Always start the oscillator first
+      oscillator.start();
+      
+      switch (type) {
+        case 'click':
+          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+          oscillator.stop(audioContext.currentTime + 0.1);
+          break;
+        case 'win':
+          // Ascending victory sound
+          oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
+          gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+          oscillator.stop(audioContext.currentTime + 0.3);
+          break;
+        case 'lose':
+          // Descending defeat sound
+          oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.4);
+          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+          oscillator.stop(audioContext.currentTime + 0.4);
+          break;
+        case 'draw':
+          // Neutral draw sound
+          oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+          oscillator.stop(audioContext.currentTime + 0.2);
+          break;
+        case 'hover':
+          oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+          oscillator.type = 'sine';
+          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+          oscillator.stop(audioContext.currentTime + 0.05);
+          break;
+      }
+    } catch (error) {
+      console.log('Audio playback failed:', error);
     }
-    
-    oscillator.start();
   };
   
   const choiceEmojis = {
@@ -129,9 +140,17 @@ export default function Game() {
 
   const playRound = (playerChoice: Choice) => {
     playSound('click');
+    setGamePhase('selecting');
     setPlayerChoice(playerChoice);
     setIsThinking(true);
     setComputerChoice(null);
+    setRoundResult("⚡ Battle in progress...");
+    
+    // Show battle animation
+    setTimeout(() => {
+      setBattleAnimation(true);
+      setGamePhase('battle');
+    }, 200);
     
     // Add thinking delay for computer
     setTimeout(() => {
@@ -140,11 +159,13 @@ export default function Game() {
       
       setComputerChoice(computerChoice);
       setIsThinking(false);
+      setBattleAnimation(false);
+      setGamePhase('result');
       
       // Update scores and play appropriate sound
       if (result === 'win') {
         setPlayerScore(prev => prev + 1);
-        setRoundResult("🎉 You Win!");
+        setRoundResult("🎉 Victory! You Win!");
         playSound('win');
         setStats(prev => ({
           ...prev,
@@ -154,7 +175,7 @@ export default function Game() {
         }));
       } else if (result === 'lose') {
         setComputerScore(prev => prev + 1);
-        setRoundResult("💔 You Lose!");
+        setRoundResult("💔 Defeat! You Lose!");
         playSound('lose');
         setStats(prev => ({
           ...prev,
@@ -171,7 +192,12 @@ export default function Game() {
           currentStreak: 0
         }));
       }
-    }, 800);
+      
+      // Reset to ready state after showing result
+      setTimeout(() => {
+        setGamePhase('ready');
+      }, 2000);
+    }, 1200);
   };
 
   const resetGame = () => {
@@ -182,6 +208,8 @@ export default function Game() {
     setComputerChoice(null);
     setRoundResult("Ready to play!");
     setIsThinking(false);
+    setBattleAnimation(false);
+    setGamePhase('ready');
     setStats({
       totalGames: 0,
       wins: 0,
@@ -242,9 +270,30 @@ export default function Game() {
           <h1 className="text-5xl font-bold text-slate-800 mb-2 tracking-tight">
             🎮 Rock Paper Scissors
           </h1>
-          <p className="text-lg text-slate-600 font-medium">
+          <p className="text-lg text-slate-600 font-medium mb-4">
             Choose your weapon and challenge the computer!
           </p>
+          
+          {/* Game Phase Indicator */}
+          <div className="flex justify-center">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+              gamePhase === 'ready' ? 'bg-blue-100 text-blue-800' :
+              gamePhase === 'selecting' ? 'bg-yellow-100 text-yellow-800' :
+              gamePhase === 'battle' ? 'bg-orange-100 text-orange-800 animate-pulse' :
+              gamePhase === 'result' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                gamePhase === 'ready' ? 'bg-blue-500' :
+                gamePhase === 'selecting' ? 'bg-yellow-500' :
+                gamePhase === 'battle' ? 'bg-orange-500 animate-ping' :
+                gamePhase === 'result' ? 'bg-green-500' : 'bg-gray-500'
+              }`}></div>
+              {gamePhase === 'ready' && 'Ready to Play'}
+              {gamePhase === 'selecting' && 'Selection Made'}
+              {gamePhase === 'battle' && 'Battle in Progress'}
+              {gamePhase === 'result' && 'Round Complete'}
+            </div>
+          </div>
         </div>
 
         {/* Game Board */}
@@ -258,14 +307,26 @@ export default function Game() {
               
               {/* Player Choice Display */}
               <div className="mb-6">
-                <div className="bg-slate-100 rounded-xl p-8 text-center min-h-[120px] flex items-center justify-center">
-                  <div className="text-6xl">
+                <div className={`bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-8 text-center min-h-[120px] flex items-center justify-center border-2 transition-all duration-300 ${
+                  gamePhase === 'battle' ? 'border-blue-500 animate-pulse' : 'border-blue-200'
+                } ${gamePhase === 'result' && roundResult.includes('Win') ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-100' : ''}`}>
+                  <div className={`text-6xl transition-all duration-500 ${
+                    battleAnimation ? 'animate-bounce scale-125' : ''
+                  } ${gamePhase === 'result' && roundResult.includes('Win') ? 'animate-celebrate' : ''}`}>
                     {playerChoice ? choiceEmojis[playerChoice] : '❓'}
                   </div>
                 </div>
                 <p className="text-center text-slate-600 mt-2 font-medium">
                   {playerChoice ? choiceNames[playerChoice] : 'Make your choice'}
                 </p>
+                {gamePhase === 'battle' && (
+                  <div className="text-center mt-2">
+                    <span className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                      Battle Ready!
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Choice Buttons */}
@@ -307,16 +368,33 @@ export default function Game() {
           <Card className="bg-white rounded-2xl shadow-lg border border-slate-200">
             <CardContent className="p-6">
               <h2 className="text-2xl font-semibold text-slate-800 mb-4 text-center">
-                🎯 Result
+                🎯 Battle Arena
               </h2>
               
               {/* Round Result Display */}
               <div className="mb-6">
-                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-8 text-center min-h-[120px] flex items-center justify-center">
-                  <div className={`text-4xl font-bold ${getResultClass()}`}>
-                    {roundResult}
+                <div className={`rounded-xl p-8 text-center min-h-[120px] flex items-center justify-center transition-all duration-500 ${
+                  gamePhase === 'battle' ? 'bg-gradient-to-r from-yellow-100 via-orange-100 to-red-100 animate-pulse' :
+                  gamePhase === 'result' && roundResult.includes('Win') ? 'bg-gradient-to-r from-green-100 to-emerald-100' :
+                  gamePhase === 'result' && roundResult.includes('Lose') ? 'bg-gradient-to-r from-red-100 to-pink-100' :
+                  gamePhase === 'result' && roundResult.includes('Draw') ? 'bg-gradient-to-r from-yellow-100 to-amber-100' :
+                  'bg-gradient-to-r from-purple-100 to-pink-100'
+                }`}>
+                  <div className={`font-bold transition-all duration-500 ${getResultClass()} ${
+                    gamePhase === 'battle' ? 'text-2xl animate-pulse' : 'text-4xl'
+                  }`}>
+                    {battleAnimation && gamePhase === 'battle' ? '⚔️ CLASH! ⚔️' : roundResult}
                   </div>
                 </div>
+                {gamePhase === 'battle' && (
+                  <div className="text-center mt-4">
+                    <div className="flex justify-center space-x-8">
+                      <div className="text-4xl animate-bounce" style={{ animationDelay: '0s' }}>💥</div>
+                      <div className="text-4xl animate-bounce" style={{ animationDelay: '0.2s' }}>⚡</div>
+                      <div className="text-4xl animate-bounce" style={{ animationDelay: '0.4s' }}>💥</div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Score Board */}
@@ -355,14 +433,28 @@ export default function Game() {
               
               {/* Computer Choice Display */}
               <div className="mb-6">
-                <div className="bg-slate-100 rounded-xl p-8 text-center min-h-[120px] flex items-center justify-center">
-                  <div className="text-6xl">
+                <div className={`bg-gradient-to-br from-red-50 to-orange-100 rounded-xl p-8 text-center min-h-[120px] flex items-center justify-center border-2 transition-all duration-300 ${
+                  gamePhase === 'battle' ? 'border-red-500 animate-pulse' : 'border-red-200'
+                } ${gamePhase === 'result' && roundResult.includes('Lose') ? 'border-red-500 bg-gradient-to-br from-red-50 to-rose-100' : ''}`}>
+                  <div className={`text-6xl transition-all duration-500 ${
+                    battleAnimation ? 'animate-bounce scale-125' : ''
+                  } ${gamePhase === 'result' && roundResult.includes('Lose') ? 'animate-celebrate' : ''} ${
+                    isThinking ? 'animate-spin' : ''
+                  }`}>
                     {isThinking ? '🤔' : (computerChoice ? choiceEmojis[computerChoice] : '🤔')}
                   </div>
                 </div>
                 <p className="text-center text-slate-600 mt-2 font-medium">
-                  {isThinking ? 'Thinking...' : (computerChoice ? choiceNames[computerChoice] : 'Thinking...')}
+                  {isThinking ? 'AI Computing...' : (computerChoice ? choiceNames[computerChoice] : 'Ready to Battle')}
                 </p>
+                {gamePhase === 'battle' && (
+                  <div className="text-center mt-2">
+                    <span className="inline-flex items-center gap-2 bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium animate-pulse">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                      AI Engaged!
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Computer Stats */}

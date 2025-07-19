@@ -25,41 +25,59 @@ export default function Home() {
   }, []);
 
   const playClickSound = () => {
-    if (isMuted || !window.audioContext) return;
+    if (isMuted || !(window as any).audioContext) return;
     
-    const oscillator = window.audioContext.createOscillator();
-    const gainNode = window.audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(window.audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(800, window.audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(400, window.audioContext.currentTime + 0.1);
-    
-    gainNode.gain.setValueAtTime(0.3, window.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, window.audioContext.currentTime + 0.1);
-    
-    oscillator.start();
-    oscillator.stop(window.audioContext.currentTime + 0.1);
+    try {
+      const audioContext = (window as any).audioContext;
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+      console.log('Audio playback failed:', error);
+    }
   };
 
   const playHoverSound = () => {
-    if (isMuted || !window.audioContext) return;
+    if (isMuted || !(window as any).audioContext) return;
     
-    const oscillator = window.audioContext.createOscillator();
-    const gainNode = window.audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(window.audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(600, window.audioContext.currentTime);
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.1, window.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, window.audioContext.currentTime + 0.05);
-    
-    oscillator.start();
-    oscillator.stop(window.audioContext.currentTime + 0.05);
+    try {
+      const audioContext = (window as any).audioContext;
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.05);
+    } catch (error) {
+      console.log('Audio playback failed:', error);
+    }
   };
 
   const startGame = () => {

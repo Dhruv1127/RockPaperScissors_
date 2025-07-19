@@ -129,6 +129,24 @@
   50% { opacity: 0.7; }
 }
 
+@keyframes battle-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 165, 0, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 165, 0, 0.6), 0 0 60px rgba(255, 165, 0, 0.4); }
+}
+
+@keyframes shake-intense {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  10% { transform: translateX(-3px) translateY(-2px); }
+  20% { transform: translateX(3px) translateY(2px); }
+  30% { transform: translateX(-3px) translateY(-2px); }
+  40% { transform: translateX(3px) translateY(2px); }
+  50% { transform: translateX(-2px) translateY(-1px); }
+  60% { transform: translateX(2px) translateY(1px); }
+  70% { transform: translateX(-2px) translateY(-1px); }
+  80% { transform: translateX(2px) translateY(1px); }
+  90% { transform: translateX(-1px) translateY(0px); }
+}
+
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
@@ -187,4 +205,12 @@
 
 .animate-bounce-slow {
   animation: bounce 2s infinite;
+}
+
+.animate-battle-glow {
+  animation: battle-glow 1s ease-in-out infinite;
+}
+
+.animate-shake-intense {
+  animation: shake-intense 0.6s ease-in-out;
 }
