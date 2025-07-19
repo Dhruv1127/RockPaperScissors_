@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application built with a React frontend and Express.js backend. The application appears to be a Rock Paper Scissors game with a modern, component-based architecture using TypeScript throughout. The system uses a monorepo structure with shared types and schemas between frontend and backend.
+This is a full-stack web application built with a React frontend and Express.js backend. The application is a Rock Paper Scissors game with a modern, component-based architecture using TypeScript throughout. The system features an animated home screen with sound effects, and a fully interactive game with AI opponent. The system uses a monorepo structure with shared types and schemas between frontend and backend.
 
 ## User Preferences
 
@@ -35,9 +35,11 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Frontend Components
-- **Game Logic**: Rock Paper Scissors game implementation with state management
+- **Home Screen**: Animated welcome screen with start/quit game options, background effects, and sound controls
+- **Game Logic**: Rock Paper Scissors game implementation with state management and sound effects
 - **UI Components**: Comprehensive set of reusable components based on Radix UI
-- **Routing**: Simple routing with game page and 404 handling
+- **Routing**: Simple routing with home screen, game page and 404 handling
+- **Audio System**: Web Audio API integration for sound effects and user interaction feedback
 - **Notifications**: Toast system for user feedback
 
 ### Backend Components

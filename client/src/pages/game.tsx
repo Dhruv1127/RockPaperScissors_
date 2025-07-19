@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
+import { useLocation } from "wouter";
 
 type Choice = 'rock' | 'paper' | 'scissors';
 type GameResult = 'win' | 'lose' | 'draw';
@@ -13,12 +15,14 @@ interface GameStats {
 }
 
 export default function Game() {
+  const [, setLocation] = useLocation();
   const [playerScore, setPlayerScore] = useState(0);
   const [computerScore, setComputerScore] = useState(0);
   const [playerChoice, setPlayerChoice] = useState<Choice | null>(null);
   const [computerChoice, setComputerChoice] = useState<Choice | null>(null);
   const [roundResult, setRoundResult] = useState<string>("Ready to play!");
   const [isThinking, setIsThinking] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [stats, setStats] = useState<GameStats>({
     totalGames: 0,
     wins: 0,
@@ -27,6 +31,71 @@ export default function Game() {
   });
 
   const choices: Choice[] = ['rock', 'paper', 'scissors'];
+
+  // Sound effects setup
+  useEffect(() => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    (window as any).gameAudioContext = audioContext;
+    
+    return () => {
+      if (audioContext.state !== 'closed') {
+        audioContext.close();
+      }
+    };
+  }, []);
+
+  const playSound = (type: 'click' | 'win' | 'lose' | 'draw' | 'hover') => {
+    if (isMuted || !(window as any).gameAudioContext) return;
+    
+    const audioContext = (window as any).gameAudioContext;
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    switch (type) {
+      case 'click':
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        oscillator.stop(audioContext.currentTime + 0.1);
+        break;
+      case 'win':
+        // Ascending victory sound
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.stop(audioContext.currentTime + 0.3);
+        break;
+      case 'lose':
+        // Descending defeat sound
+        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.4);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        oscillator.stop(audioContext.currentTime + 0.4);
+        break;
+      case 'draw':
+        // Neutral draw sound
+        oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.stop(audioContext.currentTime + 0.2);
+        break;
+      case 'hover':
+        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+        oscillator.stop(audioContext.currentTime + 0.05);
+        break;
+    }
+    
+    oscillator.start();
+  };
   
   const choiceEmojis = {
     rock: '🪨',
@@ -59,6 +128,7 @@ export default function Game() {
   };
 
   const playRound = (playerChoice: Choice) => {
+    playSound('click');
     setPlayerChoice(playerChoice);
     setIsThinking(true);
     setComputerChoice(null);
@@ -71,10 +141,11 @@ export default function Game() {
       setComputerChoice(computerChoice);
       setIsThinking(false);
       
-      // Update scores
+      // Update scores and play appropriate sound
       if (result === 'win') {
         setPlayerScore(prev => prev + 1);
         setRoundResult("🎉 You Win!");
+        playSound('win');
         setStats(prev => ({
           ...prev,
           totalGames: prev.totalGames + 1,
@@ -84,6 +155,7 @@ export default function Game() {
       } else if (result === 'lose') {
         setComputerScore(prev => prev + 1);
         setRoundResult("💔 You Lose!");
+        playSound('lose');
         setStats(prev => ({
           ...prev,
           totalGames: prev.totalGames + 1,
@@ -91,6 +163,7 @@ export default function Game() {
         }));
       } else {
         setRoundResult("🤝 It's a Draw!");
+        playSound('draw');
         setStats(prev => ({
           ...prev,
           totalGames: prev.totalGames + 1,
@@ -102,6 +175,7 @@ export default function Game() {
   };
 
   const resetGame = () => {
+    playSound('click');
     setPlayerScore(0);
     setComputerScore(0);
     setPlayerChoice(null);
@@ -116,6 +190,16 @@ export default function Game() {
     });
   };
 
+  const goHome = () => {
+    playSound('click');
+    setLocation('/');
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    playSound('click');
+  };
+
   const getResultClass = () => {
     if (roundResult.includes("Win")) return "text-green-600 animate-bounce";
     if (roundResult.includes("Lose")) return "text-red-600";
@@ -127,10 +211,34 @@ export default function Game() {
   const drawRate = stats.totalGames > 0 ? Math.round((stats.draws / stats.totalGames) * 100) : 0;
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen font-inter">
+    <div className="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen font-inter relative">
+      {/* Navigation and Controls */}
+      <div className="absolute top-6 left-6 z-10">
+        <Button
+          onClick={goHome}
+          onMouseEnter={() => playSound('hover')}
+          variant="outline"
+          className="bg-white/80 border-slate-300 text-slate-700 hover:bg-white hover:border-slate-400"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Home
+        </Button>
+      </div>
+      
+      <div className="absolute top-6 right-6 z-10">
+        <Button
+          onClick={toggleMute}
+          onMouseEnter={() => playSound('hover')}
+          variant="outline"
+          className="bg-white/80 border-slate-300 text-slate-700 hover:bg-white hover:border-slate-400"
+        >
+          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </Button>
+      </div>
+
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 mt-16">
           <h1 className="text-5xl font-bold text-slate-800 mb-2 tracking-tight">
             🎮 Rock Paper Scissors
           </h1>
@@ -164,6 +272,7 @@ export default function Game() {
               <div className="space-y-3">
                 <Button
                   onClick={() => playRound('rock')}
+                  onMouseEnter={() => playSound('hover')}
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 h-auto"
                   disabled={isThinking}
                 >
@@ -173,6 +282,7 @@ export default function Game() {
                 
                 <Button
                   onClick={() => playRound('paper')}
+                  onMouseEnter={() => playSound('hover')}
                   className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 h-auto"
                   disabled={isThinking}
                 >
@@ -182,6 +292,7 @@ export default function Game() {
                 
                 <Button
                   onClick={() => playRound('scissors')}
+                  onMouseEnter={() => playSound('hover')}
                   className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 h-auto"
                   disabled={isThinking}
                 >
@@ -227,6 +338,7 @@ export default function Game() {
               {/* Reset Button */}
               <Button
                 onClick={resetGame}
+                onMouseEnter={() => playSound('hover')}
                 className="w-full bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
               >
                 🔄 Reset Game
