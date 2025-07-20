@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors - Ultimate Battle Game</title>
+    <meta name="description" content="Challenge the AI in the ultimate Rock Paper Scissors battle! Play unlimited rounds with sound effects, animations, and track your statistics.">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Rock Paper Scissors - Ultimate Battle Game">
+    <meta property="og:description" content="Challenge the AI in the ultimate Rock Paper Scissors battle! Play unlimited rounds with sound effects and animations.">
+    <meta property="og:type" content="website">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Home Screen -->
+    <div id="home-screen" class="screen active">
+        <!-- Background Elements -->
+        <div class="background-elements">
+            <!-- Floating orbs -->
+            <div class="floating-orb orb-1"></div>
+            <div class="floating-orb orb-2"></div>
+            <div class="floating-orb orb-3"></div>
+            <div class="floating-orb orb-4"></div>
+            
+            <!-- Floating game symbols -->
+            <div class="floating-symbol symbol-1">🪨</div>
+            <div class="floating-symbol symbol-2">📄</div>
+            <div class="floating-symbol symbol-3">✂️</div>
+            
+            <!-- Particle effects -->
+            <div class="particles" id="particles-container"></div>
+        </div>
+
+        <!-- Sound control -->
+        <div class="sound-control">
+            <button id="home-mute-btn" class="mute-btn">
+                <span class="volume-icon">🔊</span>
+            </button>
+        </div>
+
+        <!-- Main content -->
+        <div class="home-content">
+            <div class="title-section">
+                <div class="game-icon">🎮</div>
+                <h1 class="main-title">ROCK PAPER SCISSORS</h1>
+                <p class="subtitle">Challenge the AI in the ultimate battle of wits!</p>
+            </div>
+
+            <!-- Menu card -->
+            <div class="menu-card">
+                <button id="start-game-btn" class="start-btn">
+                    <span class="btn-icon">▶️</span>
+                    START GAME
+                </button>
+
+                <!-- Game stats preview -->
+                <div class="stats-preview">
+                    <div class="stat-item">
+                        <div class="stat-value">∞</div>
+                        <div class="stat-label">Rounds</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">AI</div>
+                        <div class="stat-label">Opponent</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">⚡</div>
+                        <div class="stat-label">Fast Play</div>
+                    </div>
+                </div>
+
+                <button id="quit-game-btn" class="quit-btn">
+                    <span class="btn-icon">⚡</span>
+                    QUIT GAME
+                </button>
+            </div>
+
+            <!-- Game preview -->
+            <div class="game-preview">
+                <div class="preview-item" style="animation-delay: 0s">
+                    <div class="preview-emoji">🪨</div>
+                    <div class="preview-label">Rock</div>
+                </div>
+                <div class="preview-item" style="animation-delay: 0.2s">
+                    <div class="preview-emoji">📄</div>
+                    <div class="preview-label">Paper</div>
+                </div>
+                <div class="preview-item" style="animation-delay: 0.4s">
+                    <div class="preview-emoji">✂️</div>
+                    <div class="preview-label">Scissors</div>
+                </div>
+            </div>
+
+            <!-- Footer text -->
+            <div class="footer-text">
+                <p>Press START to begin your epic battle!</p>
+            </div>
+        </div>
+
+        <!-- Version info -->
+        <div class="version-info">v1.0.0</div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <!-- Navigation and Controls -->
+        <div class="game-nav">
+            <button id="home-btn" class="nav-btn">
+                <span class="btn-icon">←</span>
+                Home
+            </button>
+        </div>
+        
+        <div class="game-sound-control">
+            <button id="game-mute-btn" class="nav-btn">
+                <span class="volume-icon">🔊</span>
+            </button>
+        </div>
+
+        <div class="game-container">
+            <!-- Header Section -->
+            <div class="game-header">
+                <h1 class="game-title">🎮 Rock Paper Scissors</h1>
+                <p class="game-subtitle">Choose your weapon and challenge the computer!</p>
+                
+                <!-- Game Phase Indicator -->
+                <div class="phase-indicator">
+                    <div id="phase-dot" class="phase-dot ready"></div>
+                    <span id="phase-text">Ready to Play</span>
+                </div>
+            </div>
+
+            <!-- Game Board -->
+            <div class="game-board">
+                <!-- Player Section -->
+                <div class="player-section">
+                    <h2 class="section-title">👤 You</h2>
+                    
+                    <!-- Player Choice Display -->
+                    <div class="choice-display" id="player-display">
+                        <div class="choice-emoji" id="player-emoji">❓</div>
+                    </div>
+                    <p class="choice-label" id="player-label">Make your choice</p>
+                    <div class="battle-status" id="player-battle-status"></div>
+
+                    <!-- Choice Buttons -->
+                    <div class="choice-buttons">
+                        <button class="choice-btn rock-btn" data-choice="rock">
+                            <span class="choice-btn-emoji">🪨</span>
+                            <span class="choice-btn-text">Rock</span>
+                        </button>
+                        
+                        <button class="choice-btn paper-btn" data-choice="paper">
+                            <span class="choice-btn-emoji">📄</span>
+                            <span class="choice-btn-text">Paper</span>
+                        </button>
+                        
+                        <button class="choice-btn scissors-btn" data-choice="scissors">
+                            <span class="choice-btn-emoji">✂️</span>
+                            <span class="choice-btn-text">Scissors</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result Section -->
+                <div class="result-section">
+                    <h2 class="section-title">🎯 Battle Arena</h2>
+                    
+                    <!-- Round Result Display -->
+                    <div class="result-display" id="result-display">
+                        <div class="result-text" id="result-text">Ready to play!</div>
+                    </div>
+                    <div class="battle-effects" id="battle-effects"></div>
+
+                    <!-- Scoreboard -->
+                    <div class="scoreboard">
+                        <div class="score-item player-score">
+                            <div class="score-label">You</div>
+                            <div class="score-value" id="player-score">0</div>
+                        </div>
+                        <div class="score-vs">VS</div>
+                        <div class="score-item computer-score">
+                            <div class="score-label">Computer</div>
+                            <div class="score-value" id="computer-score">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Computer Section -->
+                <div class="computer-section">
+                    <h2 class="section-title">🤖 Computer</h2>
+                    
+                    <!-- Computer Choice Display -->
+                    <div class="choice-display" id="computer-display">
+                        <div class="choice-emoji" id="computer-emoji">🤔</div>
+                    </div>
+                    <p class="choice-label" id="computer-label">Thinking...</p>
+                    <div class="thinking-indicator" id="thinking-indicator"></div>
+                </div>
+            </div>
+
+            <!-- Game Statistics -->
+            <div class="game-stats">
+                <h3 class="stats-title">📊 Your Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number" id="total-games">0</div>
+                        <div class="stat-name">Total Games</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="win-rate">0%</div>
+                        <div class="stat-name">Win Rate</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="current-streak">0</div>
+                        <div class="stat-name">Current Streak</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="best-streak">0</div>
+                        <div class="stat-name">Best Streak</div>
+                    </div>
+                </div>
+                <button id="reset-game-btn" class="reset-btn">🔄 Reset Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

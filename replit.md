@@ -2,35 +2,29 @@
 
 ## Overview
 
-This is a full-stack web application built with a React frontend and Express.js backend. The application is a Rock Paper Scissors game with a modern, component-based architecture using TypeScript throughout. The system features an animated home screen with sound effects, and a fully interactive game with AI opponent. The system uses a monorepo structure with shared types and schemas between frontend and backend.
+This is a pure HTML, CSS, and JavaScript Rock Paper Scissors game with a modern, animated interface. The application features a beautiful home screen with floating animations, sound effects, and a fully interactive game with an AI opponent. The system has been converted from a React-based application to a vanilla web application for maximum compatibility and performance.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Project Type: Pure HTML, CSS, and JavaScript (converted from React)
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite for fast development and optimized production builds
-- **Routing**: Wouter for lightweight client-side routing
-- **State Management**: TanStack Query (React Query) for server state management
-- **UI Framework**: Radix UI primitives with shadcn/ui components
-- **Styling**: Tailwind CSS with CSS custom properties for theming
-- **Form Handling**: React Hook Form with Zod validation
+- **Technology Stack**: Pure HTML5, CSS3, and ES6+ JavaScript
+- **Styling**: Modern CSS with custom properties, animations, and responsive design
+- **Audio**: Web Audio API for sound effects and user interaction feedback
+- **State Management**: Vanilla JavaScript object-based state management
+- **Animations**: CSS keyframes and transitions for smooth user experience
+- **Responsive**: Mobile-first design with CSS Grid and Flexbox
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
-- **Development**: tsx for TypeScript execution in development
-- **Build**: esbuild for fast production builds
-- **Storage**: Currently using in-memory storage with interface for future database integration
-
-### Data Layer
-- **ORM**: Drizzle ORM configured for PostgreSQL
-- **Database**: PostgreSQL (via Neon Database serverless driver)
-- **Schema**: Shared TypeScript schemas between frontend and backend
-- **Validation**: Zod schemas for runtime type validation
+- **Server**: Simple Express.js static file server
+- **Runtime**: Node.js for development server
+- **Files**: Static HTML, CSS, and JavaScript files
+- **No Build Process**: Direct browser execution without compilation
+- **Deployment**: Static file hosting compatible
 
 ## Key Components
 
